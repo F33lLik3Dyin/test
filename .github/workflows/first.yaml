@@ -1,0 +1,36 @@
+name: test
+on: push
+
+jobs:
+  terraform:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout Repository
+         uses: actions/checkout@v2
+
+
+        - name: Set up Terraform
+         uses: hashicorp/setup-terraform@v1
+         with:
+            terraform_version: 1.0.0
+
+        - name: Initialize Terraform
+          run: terraform init
+
+
+        - name: Create Workspace
+          run: terraform workspace new 556597556918
+
+        - name: Select Workspace
+          run: terraform workspace select 556597556918
+
+        - name: Terraform Plan
+          run: terraform plan -out=tfplan
+
+        - name: Terraform Apply
+          run: terraform apply -auto-approve tfplan
+        # Note: Use '-auto-approve' in non-interactive environments to automatically approve changes.
+
+        - name: Clean up
+          run: rm -f tfplan   
