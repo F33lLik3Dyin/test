@@ -57,15 +57,6 @@ resource "aws_internet_gateway" "default" {
 }
 
 # --------------------------------
-#Default Route Table タグ管理
-resource "aws_default_route_table" "default" {
-  default_route_table_id = aws_vpc.default.default_route_table_id
-  tags = {
-    Name = "${var.environment}-${var.product}-${var.service}-rtb-default"
-  }
-}
-
-# --------------------------------
 # Public
 # 1.1 Public Subnet
 resource "aws_subnet" "public_subnet_1" {
@@ -89,10 +80,6 @@ resource "aws_subnet" "public_subnet_2" {
 }
 
 # 2.1 Public Route Table + ルート定義
-
-
-
-
 resource "aws_route_table" "route_table_public" {
   vpc_id = aws_vpc.default.id
 
@@ -180,14 +167,14 @@ resource "aws_route_table_association" "route_table_association_private_2" {
 # Nat gateway
 # EIP
 resource "aws_eip" "nat_eip_1" {
-  domain = "vpc"
+  vpc = true
   tags = {
     Name = "${var.environment}-${var.product}-${var.service}-eip-1"
   }
 }
 
 resource "aws_eip" "nat_eip_2" {
-  domain = "vpc"
+  vpc = true
   tags = {
     Name = "${var.environment}-${var.product}-${var.service}-eip-2"
   }
@@ -210,96 +197,6 @@ resource "aws_nat_gateway" "nat_gateway_2" {
     Name = "${var.environment}-${var.product}-${var.service}-ngw-1c"
   }
 }
-
-# --------------------------------
-# VPC Endpoint
-
-resource "aws_vpc_endpoint" "secretmanager" {
-  vpc_id = aws_vpc.default.id
-  service_name = "com.amazonaws.ap-northeast-1.secretsmanager"
-  vpc_endpoint_type = "Interface"
-  subnet_ids      = [ aws_subnet.public_subnet_1.id, aws_subnet.public_subnet_2.id ]
-  #SG作成後追加必要
-  #security_group_ids = [
-  #  aws_security_group.{stg-qb-igaku-kokushi-sg-vpce},
-  #]
-  tags = {
-      Name = "${var.environment}-${var.product}-${var.service}-endpoint-secretmanager"
-  }
-}
-
-resource "aws_vpc_endpoint" "s3" {
-  vpc_id = aws_vpc.default.id
-  service_name = "com.amazonaws.ap-northeast-1.s3"
-  policy = <<POLICY
-    {
-        "Statement": [
-            {
-                "Action": "*",
-                "Effect": "Allow",
-                "Resource": "*",
-                "Principal": "*"
-            }
-        ]
-    }
-    POLICY
-  tags = {
-    Name = "${var.environment}-${var.product}-${var.service}-endpoint-s3"
-  }
-}
-
-#S3作成後追加必要
-# resource "aws_vpc_endpoint_route_table_association" "public_s3" {
-#     vpc_endpoint_id = "${aws_vpc_endpoint.s3.id}"
-#     route_table_id  = "${aws_route_table.route_table_public.id}"
-# }
-
-# --------------------------------
-# Network ACL 
-resource "aws_default_network_acl" "default" {
-  default_network_acl_id = aws_vpc.default.default_network_acl_id
-
-  ingress {
-    protocol   = -1
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-  }
-
-  ingress {
-    protocol   = -1
-    rule_no    = 101
-    action     = "allow"
-    ipv6_cidr_block = "::/0"
-    from_port  = 0
-    to_port    = 0
-  }
-
-  egress {
-    protocol   = -1
-    rule_no    = 100
-    action     = "allow"
-    cidr_block = "0.0.0.0/0"
-    from_port  = 0
-    to_port    = 0
-  }
-
-  egress {
-    protocol   = -1
-    rule_no    = 100
-    action     = "allow"
-    ipv6_cidr_block = "::/0"
-    from_port  = 0
-    to_port    = 0
-  }
-
-  tags = {
-    Name = "${var.environment}-${var.product}-${var.service}-acl"
-  }
-}
-
 
 # resource "aws_network_interface_sg_attachment" "nat_gateway_attachment_1" {
 # #  security_group_id    = aws_security_group.nat_sg.id

@@ -1,9 +1,9 @@
 locals {
   bastion_aws_instance_display_name  = "${var.environment}-${var.product}-${var.service}-bastion"
-  bastion_iam_instance_profile_name  = "${var.environment}-${var.product}-${var.service}-iam-instance-profile-bastion"
-  bastion_iam_role_name              = "${var.environment}-${var.product}-${var.service}-iam-role-bastion"
-  bastion_security_group_name        = "${var.environment}-${var.product}-${var.service}-sg-bastion"
-  bastion_security_group_description = "bastion security group for ${var.environment} ${var.service} environment."
+  bastion_iam_instance_profile_name  = "${var.environment}-${var.product}-${var.service}-bastion-iam-instance-profile"
+  bastion_iam_role_name              = "${var.environment}-${var.product}-${var.service}-bastion-iam-role"
+  bastion_security_group_name        = "${var.environment}-${var.product}-${var.service}-bastion-sg"
+  bastion_security_group_description = "bastion security group for ${var.environment} ${var.service}  environment."
 }
 
 resource "aws_instance" "main" {
@@ -54,13 +54,13 @@ resource "aws_security_group" "main" {
   description = local.bastion_security_group_description
   vpc_id      = var.vpc_id
 
-  # ingress {
-  #   description = "XXX ip"
-  #   from_port   = 22
-  #   to_port     = 22
-  #   protocol    = "tcp"
-  #   cidr_blocks = ["XXX.XXX.XXX.XXX/32"]
-  # }
+  ingress {
+    description = "claves office ip"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["183.77.252.82/32"]
+  }
 
   egress {
     from_port   = 0

@@ -97,7 +97,7 @@ resource "aws_rds_cluster" "default" {
   backup_retention_period         = local.backup_retention_period
   db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.default.name
   port                            = 3306
-  skip_final_snapshot             = true #true->false
+  skip_final_snapshot             = false
   storage_encrypted               = true
   vpc_security_group_ids          = ["${var.vpc_security_group_id}"]
 
@@ -107,7 +107,7 @@ resource "aws_rds_cluster" "default" {
     max_capacity = local.max_capacity
   }
 
-  deletion_protection       = false #false->true
+  deletion_protection       = true
   apply_immediately         = true
   final_snapshot_identifier = "${var.environment}-${var.service}-final-snapshot"
 
